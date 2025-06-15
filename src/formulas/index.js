@@ -1,6 +1,6 @@
 // Main Formula Database Index
-import { speedVelocityCategory } from './categories/speedVelocity.js';
-import { timeDistanceCategory } from './categories/timeDistance.js';
+import { speedVelocityCategory } from './categories/speedvelocity.js';
+import { timeDistanceCategory } from './categories/timedistance.js';
 import { factorsCategory } from './categories/factors.js';
 
 // Main formula database export
