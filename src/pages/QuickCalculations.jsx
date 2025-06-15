@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PageLayout, { ContentCard } from '../components/Layout/PageLayout';
-import FormulaCalculator from '../components/Formula/FormulaCalculator';
+import FormulaCalculator from '../components/Formula/formulacalculator';
 import { useUnit } from '../contexts/UnitContext';
 import { formulaDatabase, getAllCategories, getFormulasByCategory } from '../formulas';
 
