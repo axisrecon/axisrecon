@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HomePageLayout } from '../components/Layout/PageLayout';
 
-const HomePage = () => {
+const Dashboard = () => {  // FIXED: Changed from HomePage to Dashboard
   const navigate = useNavigate();
 
   // Navigation tools with descriptions
@@ -11,7 +11,7 @@ const HomePage = () => {
       id: 'quick',
       title: 'Quick Calculations',
       description: 'Access individual crash reconstruction formulas for quick calculations',
-      path: '/quick',
+      path: '/app/quick',  // FIXED: Added /app prefix
       icon: (
         <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -22,7 +22,7 @@ const HomePage = () => {
       id: 'reports',
       title: 'Reconstruction Report',
       description: 'Comprehensive crash analysis with detailed reporting and PDF export',
-      path: '/full',
+      path: '/app/reports',  // FIXED: Changed from /full to /reports and added /app prefix
       icon: (
         <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5L12 5H5a2 2 0 00-2 2z" />
@@ -33,7 +33,7 @@ const HomePage = () => {
       id: 'edr',
       title: 'EDR Analysis',
       description: 'Event Data Recorder speed and distance analysis for crash reconstruction',
-      path: '/edr',
+      path: '/app/edr',  // FIXED: Added /app prefix
       icon: (
         <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -44,7 +44,7 @@ const HomePage = () => {
       id: 'preferred',
       title: 'Preferred Formulas',
       description: 'Quick access to your saved favorite formulas and common calculations',
-      path: '/preferred',
+      path: '/app/preferred',  // FIXED: Added /app prefix
       icon: (
         <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -154,4 +154,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Dashboard;  // FIXED: Changed from HomePage to Dashboard

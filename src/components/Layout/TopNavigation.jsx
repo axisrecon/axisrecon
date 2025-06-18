@@ -17,13 +17,13 @@ const TopNavigation = () => {
     precisionOptions
   } = useUnit();
 
-  // Navigation items
+  // Navigation items - updated for app routes
   const navItems = [
-    { path: '/', label: 'AxisRecon', isHome: true },
-    { path: '/quick', label: 'Quick Calc' },
-    { path: '/full', label: 'Reports' },
-    { path: '/edr', label: 'EDR' },
-    { path: '/preferred', label: 'Preferred' }
+    { path: '/app', label: 'AxisRecon', isHome: true },
+    { path: '/app/quick', label: 'Quick Calc' },
+    { path: '/app/reports', label: 'Reports' },
+    { path: '/app/edr', label: 'EDR' },
+    { path: '/app/preferred', label: 'Preferred' }
   ];
 
   const handleNavigation = (path) => {
@@ -40,8 +40,8 @@ const TopNavigation = () => {
   };
 
   const isActivePath = (path) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    if (path === '/app' && location.pathname === '/app') return true;
+    if (path !== '/app' && location.pathname.startsWith(path)) return true;
     return false;
   };
 
@@ -74,7 +74,7 @@ const TopNavigation = () => {
             {/* Mobile Brand */}
             <div className="lg:hidden">
               <button
-                onClick={() => handleNavigation('/')}
+                onClick={() => handleNavigation('/app')}
                 className="text-axisBlue font-bold text-lg font-inter"
               >
                 AxisRecon
