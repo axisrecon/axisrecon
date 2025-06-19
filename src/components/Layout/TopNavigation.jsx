@@ -19,6 +19,7 @@ const TopNavigation = () => {
 
   // Navigation items - updated for app routes
   const navItems = [
+    { path: '/', label: 'Home', isMarketingHome: true },
     { path: '/app', label: 'AxisRecon', isHome: true },
     { path: '/app/quick', label: 'Quick Calc' },
     { path: '/app/reports', label: 'Reports' },
@@ -40,8 +41,9 @@ const TopNavigation = () => {
   };
 
   const isActivePath = (path) => {
+    if (path === '/' && location.pathname === '/') return true;
     if (path === '/app' && location.pathname === '/app') return true;
-    if (path !== '/app' && location.pathname.startsWith(path)) return true;
+    if (path !== '/' && path !== '/app' && location.pathname.startsWith(path)) return true;
     return false;
   };
 
@@ -61,6 +63,8 @@ const TopNavigation = () => {
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     isActivePath(item.path)
                       ? 'bg-axisBlue text-white'
+                      : item.isMarketingHome
+                      ? 'text-gray-700 hover:bg-gray-100'
                       : item.isHome
                       ? 'text-axisBlue hover:bg-blue-50 font-semibold'
                       : 'text-gray-700 hover:bg-gray-100'
@@ -193,7 +197,7 @@ const TopNavigation = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-200">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white">
-              {navItems.slice(1).map((item) => (
+              {navItems.slice(0).map((item) => (
                 <button
                   key={item.path}
                   onClick={() => handleNavigation(item.path)}
