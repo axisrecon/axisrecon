@@ -17,7 +17,14 @@ const QuickCalculations = () => {
     setSelectedFormula(null); // Clear selected formula when changing category
   };
 
-  const handleFormulaSelect = (formula) => {
+  const handleFormulaSelect = (formulaId) => {
+    if (!formulaId) {
+      setSelectedFormula(null);
+      return;
+    }
+    
+    const formulas = getFormulasByCategory(selectedCategory);
+    const formula = formulas.find(f => f.id === formulaId);
     setSelectedFormula(formula);
   };
 
@@ -73,11 +80,11 @@ const QuickCalculations = () => {
     );
   };
 
-  const renderFormulaList = () => {
+  const renderFormulaSelector = () => {
     const formulas = getFormulasByCategory(selectedCategory);
     
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Back to Categories */}
         <button
           onClick={() => setSelectedCategory(null)}
@@ -99,23 +106,67 @@ const QuickCalculations = () => {
           </p>
         </div>
 
-        {/* Formula List */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {formulas.map((formula) => (
-            <div
-              key={formula.id}
-              onClick={() => handleFormulaSelect(formula)}
-              className={`bg-white border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md ${
-                selectedFormula?.id === formula.id 
-                  ? 'border-axisBlue bg-blue-50' 
-                  : 'border-gray-200 hover:border-axisBlue'
-              }`}
-            >
-              <h3 className="font-semibold text-gray-900 mb-1">{formula.name}</h3>
-              <p className="text-sm text-gray-600 mb-2">{formula.description}</p>
-              <div className="font-mono text-sm text-axisBlue">{formula.formula}</div>
+        {/* Formula Dropdown Selector */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Select Formula
+          </label>
+          <select
+            value={selectedFormula?.id || ''}
+            onChange={(e) => handleFormulaSelect(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-axisBlue focus:border-axisBlue bg-white text-gray-900"
+          >
+            <option value="">Choose a formula...</option>
+            {formulas.map((formula) => (
+              <option key={formula.id} value={formula.id}>
+                {formula.name} - {formula.formula}
+              </option>
+            ))}
+          </select>
+          
+          {/* Formula Description */}
+          {selectedFormula && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-semibold text-gray-900 mb-2">{selectedFormula.name}</h4>
+              <p className="text-sm text-gray-600 mb-2">{selectedFormula.description}</p>
+              <div className="font-mono text-sm text-axisBlue bg-white px-3 py-2 rounded border">
+                {selectedFormula.formula}
+              </div>
+              {selectedFormula.tags && selectedFormula.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {selectedFormula.tags.map((tag, index) => (
+                    <span 
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* Formula Quick Reference (Desktop Only) */}
+        <div className="hidden lg:block">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Available Formulas</h3>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+            {formulas.map((formula) => (
+              <div
+                key={formula.id}
+                onClick={() => handleFormulaSelect(formula.id)}
+                className={`bg-white border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-sm ${
+                  selectedFormula?.id === formula.id 
+                    ? 'border-axisBlue bg-blue-50' 
+                    : 'border-gray-200 hover:border-axisBlue'
+                }`}
+              >
+                <h4 className="font-medium text-gray-900 text-sm mb-1">{formula.name}</h4>
+                <div className="font-mono text-xs text-axisBlue">{formula.formula}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -140,7 +191,7 @@ const QuickCalculations = () => {
         >
           <p className="text-gray-600">
             {selectedCategory
-              ? "Choose a formula from the list below to perform calculations with step-by-step results."
+              ? "Choose a formula from the dropdown below to perform calculations with step-by-step results."
               : "Choose from the categories below to access individual crash reconstruction formulas. Each category contains multiple formulas with step-by-step calculations and results."
             }
           </p>
@@ -150,7 +201,7 @@ const QuickCalculations = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Left Side - Categories/Formulas */}
           <div className="xl:col-span-2">
-            {selectedCategory ? renderFormulaList() : renderCategoryGrid()}
+            {selectedCategory ? renderFormulaSelector() : renderCategoryGrid()}
           </div>
 
           {/* Right Side - Calculator */}

@@ -133,6 +133,7 @@ const FormulaCalculator = ({ formula, onAddToFavorites }) => {
       console.log('Numeric inputs:', numericInputs);
       
       const calculationResult = formula.calculate(numericInputs, unitSystem);
+      console.log('Calculation result:', calculationResult);
       setResult(calculationResult);
     } catch (error) {
       console.error('Calculation error:', error);
@@ -264,6 +265,116 @@ const FormulaCalculator = ({ formula, onAddToFavorites }) => {
       {result && (
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-semibold text-gray-900 mb-3">Results</h4>
+          
+          {/* Speed in Gear result (EDR Analysis) */}
+          {result.speedMPH !== undefined && result.finalGearRatio !== undefined && (
+            <div className="space-y-3">
+              <div className="bg-white rounded p-3 border-l-4 border-orange-500">
+                <div className="text-sm text-gray-600">Calculated Speed</div>
+                <div className="text-lg font-semibold text-orange-600">
+                  {formatResult(result.speed)} {result.speedUnit}
+                </div>
+                {unitSystem === 'metric' && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    ({formatResult(result.speedMPH)} mph)
+                  </div>
+                )}
+              </div>
+              
+              {/* Calculation breakdown */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-white rounded p-3 border-l-4 border-blue-400">
+                  <div className="text-sm text-gray-600">Engine RPM</div>
+                  <div className="text-md font-medium text-blue-600">
+                    {formatResult(result.engineRPM, 0)}
+                  </div>
+                </div>
+                <div className="bg-white rounded p-3 border-l-4 border-green-400">
+                  <div className="text-sm text-gray-600">Rolling Radius</div>
+                  <div className="text-md font-medium text-green-600">
+                    {formatResult(result.rollingRadius, 1)} {result.radiusUnit}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-white rounded p-3 border-l-4 border-purple-400">
+                  <div className="text-sm text-gray-600">Gear Ratio</div>
+                  <div className="text-md font-medium text-purple-600">
+                    {formatResult(result.gearRatio, 2)}
+                  </div>
+                </div>
+                <div className="bg-white rounded p-3 border-l-4 border-red-400">
+                  <div className="text-sm text-gray-600">Final Gear Ratio</div>
+                  <div className="text-md font-medium text-red-600">
+                    {formatResult(result.finalGearRatio, 3)}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Gear × Axle: {formatResult(result.gearRatio, 2)} × {formatResult(result.rearAxleRatio, 2)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* PDOF Angle result (EDR Analysis) */}
+          {result.pdofAngle !== undefined && (
+            <div className="space-y-3">
+              <div className="bg-white rounded p-3 border-l-4 border-purple-500">
+                <div className="text-sm text-gray-600">PDOF Angle (Θ)</div>
+                <div className="text-lg font-semibold text-purple-600">
+                  {formatResult(result.pdofAngle, 1)}° 
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Principal Direction of Force
+                </div>
+              </div>
+              
+              {/* Component breakdown */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-white rounded p-3 border-l-4 border-blue-400">
+                  <div className="text-sm text-gray-600">Longitudinal DeltaV (DeltaVₓ)</div>
+                  <div className="text-md font-medium text-blue-600">
+                    {formatResult(result.longitudinalDeltaV)} {result.speedUnit}
+                  </div>
+                </div>
+                <div className="bg-white rounded p-3 border-l-4 border-green-400">
+                  <div className="text-sm text-gray-600">Lateral DeltaV (DeltaVᵧ)</div>
+                  <div className="text-md font-medium text-green-600">
+                    {formatResult(result.lateralDeltaV)} {result.speedUnit}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Total DeltaV result (EDR Analysis) */}
+          {result.totalDeltaV !== undefined && (
+            <div className="space-y-3">
+              <div className="bg-white rounded p-3 border-l-4 border-red-500">
+                <div className="text-sm text-gray-600">Total DeltaV</div>
+                <div className="text-lg font-semibold text-red-600">
+                  {formatResult(result.totalDeltaV)} {result.speedUnit}
+                </div>
+              </div>
+              
+              {/* Component breakdown */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-white rounded p-3 border-l-4 border-blue-400">
+                  <div className="text-sm text-gray-600">Longitudinal DeltaV (DeltaVₓ)</div>
+                  <div className="text-md font-medium text-blue-600">
+                    {formatResult(result.longitudinalDeltaV)} {result.speedUnit}
+                  </div>
+                </div>
+                <div className="bg-white rounded p-3 border-l-4 border-green-400">
+                  <div className="text-sm text-gray-600">Lateral DeltaV (DeltaVᵧ)</div>
+                  <div className="text-md font-medium text-green-600">
+                    {formatResult(result.lateralDeltaV)} {result.speedUnit}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Velocity result (shows both velocity and speed) */}
           {result.velocity !== undefined && result.speed !== undefined && (

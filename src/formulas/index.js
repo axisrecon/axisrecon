@@ -1,15 +1,16 @@
+// UPDATE FILE: src/formulas/index.js
 // Main Formula Database Index
 import { speedVelocityCategory } from './categories/speedvelocity.js';
 import { timeDistanceCategory } from './categories/timedistance.js';
 import { factorsCategory } from './categories/factors.js';
+import { edrAnalysisCategory } from './categories/edrAnalysis.js'; // ADD THIS LINE
 
 // Main formula database export
 export const formulaDatabase = {
   speedVelocity: speedVelocityCategory,
   timeDistance: timeDistanceCategory,
-  factors: factorsCategory
-  // Future categories will be added here:
-  // gradeSuperelevation: gradeSuperelevationCategory
+  factors: factorsCategory,
+  edrAnalysis: edrAnalysisCategory // ADD THIS LINE
 };
 
 // Helper function to get all formulas flattened
