@@ -1,4 +1,4 @@
-// Speed and Velocity Formula Category
+// Speed and Velocity Formula Category - Enhanced with Radius and Critical Speed
 export const speedVelocityCategory = {
   id: "speedVelocity",
   name: "Speed and Velocity",
@@ -79,7 +79,7 @@ export const speedVelocityCategory = {
 
       resultUnit: "speed",
       tags: ["skid", "basic", "fundamental"],
-      relatedFormulas: ["combined_speed"]
+      relatedFormulas: ["combined_speed", "radius_equation", "critical_speed_yaw"]
     },
 
     combinedSpeed: {
@@ -162,7 +162,142 @@ export const speedVelocityCategory = {
 
       resultUnit: "speed",
       tags: ["combined", "multiple", "vector"],
-      relatedFormulas: ["basic_speed_skid"]
+      relatedFormulas: ["basic_speed_skid", "critical_speed_yaw"]
+    },
+
+    radiusEquation: {
+      id: "radius_equation",
+      name: "Radius Equation",
+      formula: "r = C² / (8mo) + mo / 2",
+      description: "Calculate radius in feet from chord and middle ordinate measurements",
+      category: "speedVelocity",
+      
+      inputs: [
+        {
+          key: "C",
+          label: "Chord (C)",
+          unit: "distance",
+          type: "number",
+          validation: { min: 0.1, required: true },
+          placeholder: "50"
+        },
+        {
+          key: "mo",
+          label: "Middle Ordinate (mo)",
+          unit: "distance",
+          type: "number",
+          validation: { min: 0.1, required: true },
+          placeholder: "8"
+        }
+      ],
+
+      calculate: (inputs, unitSystem) => {
+        const { C, mo } = inputs;
+        
+        // r = C² / (8mo) + mo / 2
+        const radius = (C * C) / (8 * mo) + mo / 2;
+        
+        return {
+          radius: radius,
+          radiusUnit: unitSystem === 'imperial' ? 'ft' : 'm',
+          chord: C,
+          middleOrdinate: mo,
+          distanceUnit: unitSystem === 'imperial' ? 'ft' : 'm'
+        };
+      },
+
+      generateSteps: (inputs, unitSystem, result) => {
+        const { C, mo } = inputs;
+        const distanceUnit = unitSystem === 'imperial' ? 'ft' : 'm';
+        
+        return [
+          "Given:",
+          `Chord (C) = ${C} ${distanceUnit}`,
+          `Middle Ordinate (mo) = ${mo} ${distanceUnit}`,
+          "",
+          "Formula: r = C² / (8mo) + mo / 2",
+          `Substitution: r = ${C}² / (8 × ${mo}) + ${mo} / 2`,
+          `Calculation: r = ${C * C} / ${8 * mo} + ${mo / 2}`,
+          `Calculation: r = ${(C * C) / (8 * mo)} + ${mo / 2}`,
+          `Result: r = ${result.radius.toFixed(2)} ${result.radiusUnit}`
+        ];
+      },
+
+      resultUnit: "distance",
+      tags: ["radius", "chord", "geometry", "yaw"],
+      relatedFormulas: ["critical_speed_yaw"]
+    },
+
+    criticalSpeedYaw: {
+      id: "critical_speed_yaw",
+      name: "Critical Speed Yaw",
+      formula: "S = 3.86√(rf)",
+      description: "Calculate critical speed for yaw using radius and adjusted deceleration factor",
+      category: "speedVelocity",
+      
+      inputs: [
+        {
+          key: "r",
+          label: "Radius (r)",
+          unit: "distance",
+          type: "number",
+          validation: { min: 0.1, required: true },
+          placeholder: "150"
+        },
+        {
+          key: "f",
+          label: "Adjusted Deceleration Factor (f)",
+          unit: "coefficient",
+          type: "number",
+          validation: { min: 0.1, max: 2.0, required: true },
+          placeholder: "0.75"
+        }
+      ],
+
+      calculate: (inputs, unitSystem) => {
+        const { r, f } = inputs;
+        
+        // S = 3.86√(rf)
+        const speed = 3.86 * Math.sqrt(r * f);
+        
+        // Convert to velocity using 1.466 factor
+        let velocity;
+        if (unitSystem === 'imperial') {
+          velocity = speed * 1.466; // mph to ft/s
+        } else {
+          velocity = speed / 3.6; // km/h to m/s
+        }
+        
+        return {
+          speed: speed,               // mph or km/h (scalar)
+          velocity: velocity,         // ft/s or m/s (vector)
+          speedUnit: unitSystem === 'imperial' ? 'mph' : 'km/h',
+          velocityUnit: unitSystem === 'imperial' ? 'ft/s' : 'm/s',
+          radius: r,
+          decelerationFactor: f
+        };
+      },
+
+      generateSteps: (inputs, unitSystem, result) => {
+        const { r, f } = inputs;
+        const distanceUnit = unitSystem === 'imperial' ? 'ft' : 'm';
+        
+        return [
+          "Given:",
+          `Radius (r) = ${r} ${distanceUnit}`,
+          `Adjusted Deceleration Factor (f) = ${f}`,
+          "",
+          "Formula: S = 3.86√(rf)",
+          `Substitution: S = 3.86 × √(${r} × ${f})`,
+          `Calculation: S = 3.86 × √(${r * f})`,
+          `Calculation: S = 3.86 × ${Math.sqrt(r * f).toFixed(3)}`,
+          `Result: S = ${result.speed.toFixed(2)} ${result.speedUnit} (${result.velocity.toFixed(2)} ${result.velocityUnit})`
+        ];
+      },
+
+      resultUnit: "speed",
+      tags: ["critical", "yaw", "radius", "deceleration"],
+      relatedFormulas: ["radius_equation", "basic_speed_skid"]
     }
   }
 };

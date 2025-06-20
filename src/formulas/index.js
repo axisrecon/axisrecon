@@ -1,16 +1,20 @@
-// UPDATE FILE: src/formulas/index.js
-// Main Formula Database Index
-import { speedVelocityCategory } from './categories/speedvelocity.js';
-import { timeDistanceCategory } from './categories/timedistance.js';
+// UPDATED FILE: src/formulas/index.js
+// Main Formula Database Index with Airborne Category
+import { speedVelocityCategory } from './categories/speedVelocity.js';
+import { timeDistanceCategory } from './categories/timeDistance.js';
 import { factorsCategory } from './categories/factors.js';
-import { edrAnalysisCategory } from './categories/edrAnalysis.js'; // ADD THIS LINE
+import { edrAnalysisCategory } from './categories/edrAnalysis.js';
+import { pedestrianMotorcycleCategory } from './categories/pedestrianMotorcycle.js';
+import { airborneCategory } from './categories/airborne.js'; // ADD THIS LINE
 
 // Main formula database export
 export const formulaDatabase = {
   speedVelocity: speedVelocityCategory,
   timeDistance: timeDistanceCategory,
   factors: factorsCategory,
-  edrAnalysis: edrAnalysisCategory // ADD THIS LINE
+  edrAnalysis: edrAnalysisCategory,
+  pedestrianMotorcycle: pedestrianMotorcycleCategory,
+  airborne: airborneCategory // ADD THIS LINE
 };
 
 // Helper function to get all formulas flattened
@@ -79,7 +83,11 @@ export const getUnitLabel = (unitType, unitSystem) => {
       force: 'lbs',           // Force/Weight in pounds
       coefficient: '',
       percentage: '%',
-      time: 's'
+      time: 's',
+      angle: 'degrees',       // Added for airborne calculations
+      rpm: 'RPM',             // Added for motorcycle/vehicle calculations
+      ratio: '',              // Added for gear ratios
+      wheelRadius: 'inches'   // Added for wheel radius measurements
     },
     metric: {
       distance: 'm',
@@ -89,7 +97,11 @@ export const getUnitLabel = (unitType, unitSystem) => {
       force: 'kg',            // Force/Weight in kilograms
       coefficient: '',
       percentage: '%',
-      time: 's'
+      time: 's',
+      angle: 'degrees',       // Added for airborne calculations
+      rpm: 'RPM',             // Added for motorcycle/vehicle calculations
+      ratio: '',              // Added for gear ratios
+      wheelRadius: 'cm'       // Added for wheel radius measurements (metric)
     }
   };
   
