@@ -99,7 +99,7 @@ export const factorsCategory = {
 
       resultUnit: "coefficient",
       tags: ["drag", "sled", "coefficient"],
-      relatedFormulas: ["drag_factor_speed_distance", "drag_factor_speed_time"]
+      relatedFormulas: ["drag_factor_speed_distance", "drag_factor_speed_time", "factor_rate_conversion"]
     },
 
     dragFactorSpeedDistance: {
@@ -162,7 +162,7 @@ export const factorsCategory = {
 
       resultUnit: "coefficient",
       tags: ["drag", "speed", "distance"],
-      relatedFormulas: ["drag_factor_sled", "drag_factor_speed_time"]
+      relatedFormulas: ["drag_factor_sled", "drag_factor_speed_time", "factor_rate_conversion"]
     },
 
     dragFactorSpeedTime: {
@@ -225,7 +225,127 @@ export const factorsCategory = {
 
       resultUnit: "coefficient",
       tags: ["drag", "time", "distance"],
-      relatedFormulas: ["drag_factor_sled", "drag_factor_speed_distance"]
+      relatedFormulas: ["drag_factor_sled", "drag_factor_speed_distance", "factor_rate_conversion"]
+    },
+
+    factorRateConversion: {
+      id: "factor_rate_conversion",
+      name: "Factor and Rate Conversion",
+      formula: "f = a/32.2 | a = f×32.2",
+      description: "Convert between acceleration factor and acceleration rate using standard gravity (32.2 ft/s²)",
+      category: "factors",
+      
+      inputs: [
+        {
+          key: "inputType",
+          label: "Calculate From",
+          type: "select",
+          options: [
+            { value: "factor", label: "Factor (f) → Rate (a)" },
+            { value: "rate", label: "Rate (a) → Factor (f)" }
+          ],
+          validation: { required: true },
+          default: "factor"
+        },
+        {
+          key: "f",
+          label: "Acceleration Factor (f)",
+          unit: "coefficient",
+          type: "number",
+          validation: { min: 0.01, max: 2.0, required: false },
+          placeholder: "0.75",
+          conditionalRequired: "factor"
+        },
+        {
+          key: "a",
+          label: "Acceleration Rate (a)",
+          unit: "acceleration",
+          type: "number",
+          validation: { min: 0.1, max: 64.4, required: false },
+          placeholder: "24.15",
+          conditionalRequired: "rate"
+        }
+      ],
+
+      calculate: (inputs, unitSystem) => {
+        console.log('Factor Rate Conversion - inputs:', inputs); // Debug log
+        
+        const { inputType, f, a } = inputs;
+        const g = 32.2; // Standard gravity constant for crash reconstruction
+        
+        let calculatedFactor = null;
+        let calculatedRate = null;
+        
+        if (inputType === "factor") {
+          const factorValue = parseFloat(f);
+          console.log('Calculating from factor:', factorValue); // Debug log
+          if (!isNaN(factorValue)) {
+            // Calculate rate from factor: a = f × 32.2
+            calculatedRate = factorValue * g;
+            calculatedFactor = factorValue;
+            console.log('Calculated rate:', calculatedRate); // Debug log
+          }
+        } else if (inputType === "rate") {
+          const rateValue = parseFloat(a);
+          console.log('Calculating from rate:', rateValue); // Debug log
+          if (!isNaN(rateValue)) {
+            // Calculate factor from rate: f = a / 32.2
+            calculatedFactor = rateValue / g;
+            calculatedRate = rateValue;
+            console.log('Calculated factor:', calculatedFactor); // Debug log
+          }
+        }
+        
+        const result = {
+          factor: calculatedFactor,
+          rate: calculatedRate,
+          gravity: g,
+          inputType: inputType,
+          rateUnit: unitSystem === 'imperial' ? 'ft/s²' : 'm/s²',
+          gravityUnit: unitSystem === 'imperial' ? 'ft/s²' : 'm/s²'
+        };
+        
+        console.log('Final result:', result); // Debug log
+        return result;
+      },
+
+      generateSteps: (inputs, unitSystem, result) => {
+        const { inputType, f, a } = inputs;
+        const g = 32.2;
+        const rateUnit = unitSystem === 'imperial' ? 'ft/s²' : 'm/s²';
+        
+        if (inputType === "factor") {
+          return [
+            "Given:",
+            `Acceleration Factor (f) = ${f}`,
+            `Standard Gravity (g) = ${g} ${rateUnit}`,
+            "",
+            "Formula: a = f × 32.2",
+            `Substitution: a = ${f} × ${g}`,
+            `Result: a = ${result.rate.toFixed(2)} ${rateUnit}`
+          ];
+        } else {
+          return [
+            "Given:",
+            `Acceleration Rate (a) = ${a} ${rateUnit}`,
+            `Standard Gravity (g) = ${g} ${rateUnit}`,
+            "",
+            "Formula: f = a / 32.2",
+            `Substitution: f = ${a} / ${g}`,
+            `Result: f = ${result.factor.toFixed(3)}`
+          ];
+        }
+      },
+
+      resultUnit: "coefficient",
+      tags: ["factor", "rate", "acceleration", "conversion", "gravity"],
+      relatedFormulas: ["drag_factor_sled", "drag_factor_speed_distance", "drag_factor_speed_time"],
+      
+      notes: [
+        "Standard gravity: 32.2 ft/s² (imperial) or 9.81 m/s² (metric)",
+        "Factor is dimensionless (unitless coefficient)",
+        "Rate is acceleration in ft/s² or m/s²"
+      ]
     }
   }
 };

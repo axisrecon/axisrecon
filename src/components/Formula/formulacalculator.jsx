@@ -17,6 +17,8 @@ const FormulaCalculator = ({ formula, onAddToFavorites }) => {
         initialInputs[input.key] = input.default;
       } else if (input.type === 'dynamic_array') {
         // Don't initialize dynamic arrays here
+      } else if (input.defaultValue !== undefined) {
+        initialInputs[input.key] = input.defaultValue;
       } else {
         initialInputs[input.key] = '';
       }
@@ -79,36 +81,66 @@ const FormulaCalculator = ({ formula, onAddToFavorites }) => {
   const validateInputs = () => {
     const newErrors = {};
     
-    formula.inputs.forEach(input => {
-      if (input.type === 'dynamic_array') {
-        // Validate dynamic inputs
-        dynamicInputs.forEach((dynInput, index) => {
-          const value = parseFloat(dynInput.value);
-          const errorKey = dynInput.key;
-          if (!dynInput.value || dynInput.value === '' || isNaN(value)) {
-            newErrors[errorKey] = 'Required';
-          } else if (input.validation.min && value < input.validation.min) {
-            newErrors[errorKey] = `Must be ≥ ${input.validation.min}`;
-          } else if (input.validation.max && value > input.validation.max) {
-            newErrors[errorKey] = `Must be ≤ ${input.validation.max}`;
+    // Special validation for Factor and Rate Conversion
+    if (formula.id === 'factor_rate_conversion') {
+      const { inputType, f, a } = inputs;
+      
+      if (inputType === 'factor') {
+        if (!f || f === '' || isNaN(parseFloat(f))) {
+          newErrors.f = 'Factor is required when calculating rate';
+        } else {
+          const fVal = parseFloat(f);
+          if (fVal < 0.01 || fVal > 2.0) {
+            newErrors.f = 'Factor must be between 0.01 and 2.0';
           }
-        });
-      } else if (input.type !== 'select') {
-        const value = inputs[input.key];
-        
-        if (input.validation.required && (!value || value === '')) {
-          newErrors[input.key] = 'Required';
-        } else if (value !== '' && !isNaN(value) && value !== null) {
-          const numValue = parseFloat(value);
-          if (input.validation.min && numValue < input.validation.min) {
-            newErrors[input.key] = `Must be ≥ ${input.validation.min}`;
-          }
-          if (input.validation.max && numValue > input.validation.max) {
-            newErrors[input.key] = `Must be ≤ ${input.validation.max}`;
+        }
+      } else if (inputType === 'rate') {
+        if (!a || a === '' || isNaN(parseFloat(a))) {
+          newErrors.a = 'Rate is required when calculating factor';
+        } else {
+          const aVal = parseFloat(a);
+          if (aVal < 0.1 || aVal > 64.4) {
+            newErrors.a = 'Rate must be between 0.1 and 64.4';
           }
         }
       }
-    });
+      
+      // Force calculation to proceed if no validation errors
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    } else {
+      // Standard validation for other formulas
+      formula.inputs.forEach(input => {
+        if (input.type === 'dynamic_array') {
+          // Validate dynamic inputs
+          dynamicInputs.forEach((dynInput, index) => {
+            const value = parseFloat(dynInput.value);
+            const errorKey = dynInput.key;
+            if (!dynInput.value || dynInput.value === '' || isNaN(value)) {
+              newErrors[errorKey] = 'Required';
+            } else if (input.validation.min && value < input.validation.min) {
+              newErrors[errorKey] = `Must be ≥ ${input.validation.min}`;
+            } else if (input.validation.max && value > input.validation.max) {
+              newErrors[errorKey] = `Must be ≤ ${input.validation.max}`;
+            }
+          });
+        } else if (input.type !== 'select') {
+          const value = inputs[input.key];
+          
+          if (input.validation.required && (!value || value === '')) {
+            newErrors[input.key] = 'Required';
+          } else if (value !== '' && !isNaN(value) && value !== null) {
+            const numValue = parseFloat(value);
+            if (input.validation.min && numValue < input.validation.min) {
+              newErrors[input.key] = `Must be ≥ ${input.validation.min}`;
+            }
+            if (input.validation.max && numValue > input.validation.max) {
+              newErrors[input.key] = `Must be ≤ ${input.validation.max}`;
+            }
+          }
+        }
+      });
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -124,12 +156,16 @@ const FormulaCalculator = ({ formula, onAddToFavorites }) => {
         if (Array.isArray(inputs[key])) {
           // Handle arrays (like forces or speeds)
           numericInputs[key] = inputs[key].map(val => parseFloat(val)).filter(val => !isNaN(val));
-        } else if (inputs[key] !== '' && inputs[key] !== null) {
-          numericInputs[key] = parseFloat(inputs[key]);
+        } else if (inputs[key] !== '' && inputs[key] !== null && inputs[key] !== undefined) {
+          const parsed = parseFloat(inputs[key]);
+          numericInputs[key] = isNaN(parsed) ? inputs[key] : parsed;
+        } else {
+          numericInputs[key] = inputs[key]; // Keep non-numeric values as is
         }
       });
       
       // Debug logging
+      console.log('Raw inputs:', inputs);
       console.log('Numeric inputs:', numericInputs);
       
       const calculationResult = formula.calculate(numericInputs, unitSystem);
@@ -199,6 +235,21 @@ const FormulaCalculator = ({ formula, onAddToFavorites }) => {
       );
     }
 
+    // Check if this input should be shown based on conditional requirements
+    if (formula.id === 'factor_rate_conversion') {
+      const { inputType } = inputs;
+      if (input.conditionalRequired) {
+        // Only show factor input when calculating from factor
+        if (input.conditionalRequired === 'factor' && inputType !== 'factor') {
+          return null;
+        }
+        // Only show rate input when calculating from rate
+        if (input.conditionalRequired === 'rate' && inputType !== 'rate') {
+          return null;
+        }
+      }
+    }
+
     // Regular input
     return (
       <div key={input.key}>
@@ -265,6 +316,49 @@ const FormulaCalculator = ({ formula, onAddToFavorites }) => {
       {result && (
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-semibold text-gray-900 mb-3">Results</h4>
+          
+          {/* Factor and Rate Conversion Results */}
+          {formula.id === 'factor_rate_conversion' && (
+            <div className="space-y-3">
+              {result.inputType === 'factor' && result.rate !== null ? (
+                // Show calculated rate
+                <div className="bg-white rounded p-3 border-l-4 border-green-500">
+                  <div className="text-sm text-gray-600">Calculated Acceleration Rate</div>
+                  <div className="text-lg font-semibold text-green-600">
+                    {formatResult(result.rate, 2)} {result.rateUnit}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    From factor: {formatResult(result.factor, 3)}
+                  </div>
+                </div>
+              ) : result.inputType === 'rate' && result.factor !== null ? (
+                // Show calculated factor
+                <div className="bg-white rounded p-3 border-l-4 border-purple-500">
+                  <div className="text-sm text-gray-600">Calculated Acceleration Factor</div>
+                  <div className="text-lg font-semibold text-purple-600">
+                    {formatResult(result.factor, 3)}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    From rate: {formatResult(result.rate, 2)} {result.rateUnit}
+                  </div>
+                </div>
+              ) : (
+                // Fallback if no valid calculation
+                <div className="bg-yellow-50 rounded p-3 border border-yellow-200">
+                  <div className="text-sm text-yellow-800">
+                    Please enter a valid {result.inputType === 'factor' ? 'factor' : 'rate'} value to calculate.
+                  </div>
+                </div>
+              )}
+              
+              {/* Show the constant gravity value */}
+              <div className="bg-blue-50 rounded p-3 border border-blue-200">
+                <div className="text-sm text-blue-800">
+                  <strong>Standard Gravity:</strong> {result.gravity} {result.gravityUnit}
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Speed in Gear result (EDR Analysis) */}
           {result.speedMPH !== undefined && result.finalGearRatio !== undefined && (
@@ -415,7 +509,7 @@ const FormulaCalculator = ({ formula, onAddToFavorites }) => {
           )}
           
           {/* Drag Factor result */}
-          {result.dragFactor !== undefined && (
+          {result.dragFactor !== undefined && formula.id !== 'factor_rate_conversion' && (
             <div className="bg-white rounded p-3 border-l-4 border-purple-500">
               <div className="text-sm text-gray-600">Drag Factor</div>
               <div className="text-lg font-semibold text-purple-600">
