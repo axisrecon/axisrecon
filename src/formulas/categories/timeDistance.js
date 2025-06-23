@@ -1,8 +1,8 @@
 // Time & Distance Formula Category
 export const timeDistanceCategory = {
   id: "timeDistance",
-  name: "Time & Distance",
-  description: "Basic time, distance, and velocity calculations for crash reconstruction",
+  name: "Time, Distance, & Velocity",
+  description: "Basic time, distance, and velocity formulas",
   icon: "clock",
   formulas: {
     time: {
@@ -254,6 +254,156 @@ export const timeDistanceCategory = {
       resultUnit: "time",
       tags: ["time", "speed change", "deceleration"],
       relatedFormulas: ["time", "distance", "velocity"]
+    },
+
+    timeToStop: {
+      id: "time_to_stop",
+      name: "Time To/From a Stop",
+      formula: "t = 0.249√(D/f)",
+      description: "Calculate time to/from a stop from distance and drag factor",
+      category: "timeDistance",
+      
+      inputs: [
+        {
+          key: "D",
+          label: "Distance",
+          unit: "distance",
+          type: "number",
+          validation: { min: 0.1, required: true },
+          placeholder: "150"
+        },
+        {
+          key: "f",
+          label: "Drag Factor",
+          unit: "coefficient",
+          type: "number",
+          validation: { min: 0.1, max: 2.0, required: true },
+          placeholder: "0.75"
+        }
+      ],
+
+      calculate: (inputs, unitSystem) => {
+        const { D, f } = inputs;
+        
+        // Convert distance to appropriate units for calculation
+        let distanceForCalc = D;
+        let constant = 0.249; // Imperial constant (feet)
+        
+        if (unitSystem === 'metric') {
+          // Use metric constant for meters
+          constant = 0.452;
+        }
+        
+        // t = constant × √(D/f)
+        const time = constant * Math.sqrt(distanceForCalc / f);
+        
+        return {
+          time: time,
+          timeUnit: "s",
+          distance: D,
+          distanceUnit: unitSystem === 'imperial' ? 'ft' : 'm',
+          dragFactor: f,
+          constant: constant
+        };
+      },
+
+      generateSteps: (inputs, unitSystem, result) => {
+        const { D, f } = inputs;
+        const distanceUnit = unitSystem === 'imperial' ? 'ft' : 'm';
+        const constant = unitSystem === 'imperial' ? '0.249' : '0.452';
+        
+        return [
+          "Given:",
+          `Distance = ${D} ${distanceUnit}`,
+          `Drag Factor = ${f}`,
+          "",
+          `Formula: t = ${constant}√(D/f)`,
+          `Substitution: t = ${constant}√(${D}/${f})`,
+          `Calculation: t = ${constant}√(${(D/f).toFixed(3)})`,
+          `Calculation: t = ${constant} × ${Math.sqrt(D/f).toFixed(3)}`,
+          `Result: t = ${result.time.toFixed(2)} ${result.timeUnit}`
+        ];
+      },
+
+      resultUnit: "time",
+      tags: ["time", "stopping", "deceleration", "braking"],
+      relatedFormulas: ["distanceToStop", "timeFromSpeedChange"]
+    },
+
+    distanceToStop: {
+      id: "distance_to_stop",
+      name: "Distance To/From a Stop",
+      formula: "D = S²/(30×f)",
+      description: "Calculate distance to/from a stop from initial speed and drag factor",
+      category: "timeDistance",
+      
+      inputs: [
+        {
+          key: "S",
+          label: "Speed",
+          unit: "speed",
+          type: "number",
+          validation: { min: 0.1, required: true },
+          placeholder: "55"
+        },
+        {
+          key: "f",
+          label: "Drag Factor",
+          unit: "coefficient",
+          type: "number",
+          validation: { min: 0.1, max: 2.0, required: true },
+          placeholder: "0.75"
+        }
+      ],
+
+      calculate: (inputs, unitSystem) => {
+        const { S, f } = inputs;
+        
+        // D = S²/(30×f)
+        // This formula uses speed in mph and gives distance in feet
+        // For metric, we need to convert
+        let speedForCalc = S;
+        let constant = 30;
+        
+        if (unitSystem === 'metric') {
+          // Convert km/h to m/s equivalent calculation
+          // Using constant 254 for metric (km/h to meters)
+          constant = 254;
+        }
+        
+        const distance = (speedForCalc * speedForCalc) / (constant * f);
+        
+        return {
+          distance: distance,
+          distanceUnit: unitSystem === 'imperial' ? 'ft' : 'm',
+          speed: S,
+          speedUnit: unitSystem === 'imperial' ? 'mph' : 'km/h',
+          dragFactor: f,
+          constant: constant
+        };
+      },
+
+      generateSteps: (inputs, unitSystem, result) => {
+        const { S, f } = inputs;
+        const speedUnit = unitSystem === 'imperial' ? 'mph' : 'km/h';
+        const distanceUnit = unitSystem === 'imperial' ? 'ft' : 'm';
+        const constant = unitSystem === 'imperial' ? '30' : '254';
+        
+        return [
+          "Given:",
+          `Speed = ${S} ${speedUnit}`,
+          `Drag Factor = ${f}`,
+          "",
+          `Formula: D = S²/(${constant}×f)`,
+          `Substitution: D = ${S}²/(${constant}×${f})`,
+          `Calculation: D = ${S * S}/(${constant * f})`,
+          `Result: D = ${result.distance.toFixed(2)} ${result.distanceUnit}`
+        ];
+      },
+
+      resultUnit: "distance",
+      tags: ["distance", "stopping", "braking", "deceleration"],
+      relatedFormulas: ["timeToStop", "timeFromSpeedChange"]
     }
   }
 };

@@ -5,7 +5,13 @@ import { useUnit } from '../contexts/UnitContext';
 import { formulaDatabase, getAllCategories, getFormulasByCategory } from '../formulas';
 
 const QuickCalculations = () => {
-  const { unitSystem } = useUnit();
+  // Get unit system and preferred formulas from context
+  const { 
+    unitSystem, 
+    isFormulaPreferred, 
+    togglePreferredFormula 
+  } = useUnit();
+  
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedFormula, setSelectedFormula] = useState(null);
 
@@ -28,10 +34,9 @@ const QuickCalculations = () => {
     setSelectedFormula(formula);
   };
 
-  const handleAddToFavorites = (formula) => {
-    // TODO: Implement favorites functionality
-    console.log('Adding to favorites:', formula.name);
-    // This will be connected to PreferredFormulas later
+  // Updated star toggle handler
+  const handleStarToggle = (formula) => {
+    togglePreferredFormula(formula.id);
   };
 
   const renderCategoryGrid = () => {
@@ -148,22 +153,50 @@ const QuickCalculations = () => {
           )}
         </div>
 
-        {/* Formula Quick Reference (Desktop Only) */}
+        {/* Formula Quick Reference (Desktop Only) - NOW WITH FUNCTIONAL STARS */}
         <div className="hidden lg:block">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Available Formulas</h3>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
             {formulas.map((formula) => (
               <div
                 key={formula.id}
-                onClick={() => handleFormulaSelect(formula.id)}
-                className={`bg-white border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-sm ${
+                className={`bg-white border rounded-lg p-3 transition-all duration-200 hover:shadow-sm relative ${
                   selectedFormula?.id === formula.id 
                     ? 'border-axisBlue bg-blue-50' 
                     : 'border-gray-200 hover:border-axisBlue'
                 }`}
               >
-                <h4 className="font-medium text-gray-900 text-sm mb-1">{formula.name}</h4>
-                <div className="font-mono text-xs text-axisBlue">{formula.formula}</div>
+                {/* Star Icon - NOW FUNCTIONAL */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent formula selection when clicking star
+                    handleStarToggle(formula);
+                  }}
+                  className={`absolute top-2 right-2 p-1 transition-colors duration-200 ${
+                    isFormulaPreferred(formula.id)
+                      ? 'text-yellow-500 hover:text-yellow-600'
+                      : 'text-gray-400 hover:text-axisBlue'
+                  }`}
+                  title={isFormulaPreferred(formula.id) ? 'Remove from preferred' : 'Add to preferred'}
+                >
+                  <svg 
+                    className="h-4 w-4" 
+                    fill={isFormulaPreferred(formula.id) ? 'currentColor' : 'none'} 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </button>
+                
+                {/* Formula Content - Clickable to select */}
+                <div 
+                  onClick={() => handleFormulaSelect(formula.id)}
+                  className="cursor-pointer pr-8"
+                >
+                  <h4 className="font-medium text-gray-900 text-sm mb-1">{formula.name}</h4>
+                  <div className="font-mono text-xs text-axisBlue">{formula.formula}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -209,7 +242,8 @@ const QuickCalculations = () => {
             {selectedFormula ? (
               <FormulaCalculator 
                 formula={selectedFormula}
-                onAddToFavorites={handleAddToFavorites}
+                onAddToFavorites={handleStarToggle}
+                isPreferred={isFormulaPreferred(selectedFormula.id)}
               />
             ) : (
               <div className="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">

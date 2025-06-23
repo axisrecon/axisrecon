@@ -1,8 +1,8 @@
-// Speed and Velocity Formula Category - Enhanced with Radius and Critical Speed
+// Speed and Critical Speed Formula Category - Enhanced for Crash Reconstruction
 export const speedVelocityCategory = {
   id: "speedVelocity",
-  name: "Speed and Velocity",
-  description: "Speed calculations and velocity analysis for crash reconstruction",
+  name: "Speed and Critical Speed",
+  description: "Speed and critical speed formulas",
   icon: "lightning",
   formulas: {
     basicSpeedSkid: {

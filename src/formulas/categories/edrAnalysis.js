@@ -3,8 +3,8 @@
 
 export const edrAnalysisCategory = {
   id: "edrAnalysis",
-  name: "EDR Analysis", 
-  description: "Event Data Recorder calculations for crash reconstruction analysis",
+  name: "EDR Analysis Formuals", 
+  description: "Event Data Recorder analysis formulas",
   icon: "edr",
   formulas: {
     totalDeltaV: {

@@ -4,7 +4,7 @@
 export const airborneCategory = {
   id: "airborne",
   name: "Airborne",
-  description: "Projectile motion and airborne vehicle calculations for crash reconstruction analysis",
+  description: "Airborne vehicle formulas",
   icon: "flight",
   formulas: {
     airborneSpeedWithAngle: {

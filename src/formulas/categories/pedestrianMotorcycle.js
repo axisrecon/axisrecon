@@ -2,7 +2,7 @@
 export const pedestrianMotorcycleCategory = {
   id: "pedestrianMotorcycle",
   name: "Pedestrian & Motorcycle",
-  description: "Specialized formulas for pedestrian and motorcycle crash reconstruction analysis",
+  description: "Pedestrian and Motorcylce specialized formulas",
   icon: "pedestrian",
   formulas: {
     searleMinimumSpeed: {

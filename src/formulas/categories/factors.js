@@ -1,8 +1,8 @@
 // Factors Formula Category
 export const factorsCategory = {
   id: "factors",
-  name: "Factors",
-  description: "Drag factor and coefficient calculations for crash reconstruction",
+  name: "Factors and Rates",
+  description: "Drag factor and rate formuals",
   icon: "factors",
   formulas: {
     dragFactorSled: {

@@ -7,7 +7,9 @@ const UnitContext = createContext();
 const STORAGE_KEYS = {
   UNIT_SYSTEM: 'axisrecon_unit_system',
   DECIMAL_PRECISION: 'axisrecon_decimal_precision',
-  DISCLAIMER_ACCEPTED: 'axisrecon_disclaimer_accepted'
+  DISCLAIMER_ACCEPTED: 'axisrecon_disclaimer_accepted',
+  PREFERRED_FORMULAS: 'axisrecon_preferred_formulas',
+  CALCULATION_HISTORY: 'axisrecon_calculation_history'  // NEW: Added calculation history key
 };
 
 // Unit conversion definitions
@@ -68,6 +70,18 @@ export const UnitProvider = ({ children }) => {
     return saved === 'true';
   });
 
+  // NEW: Initialize preferred formulas from session storage
+  const [preferredFormulas, setPreferredFormulasState] = useState(() => {
+    const saved = sessionStorage.getItem(STORAGE_KEYS.PREFERRED_FORMULAS);
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // NEW: Initialize calculation history from session storage
+  const [calculationHistory, setCalculationHistoryState] = useState(() => {
+    const saved = sessionStorage.getItem(STORAGE_KEYS.CALCULATION_HISTORY);
+    return saved ? JSON.parse(saved) : [];
+  });
+
   // Persist unit system changes
   const setUnitSystem = (system) => {
     setUnitSystemState(system);
@@ -84,6 +98,100 @@ export const UnitProvider = ({ children }) => {
   const setDisclaimerAccepted = (accepted) => {
     setDisclaimerAcceptedState(accepted);
     sessionStorage.setItem(STORAGE_KEYS.DISCLAIMER_ACCEPTED, accepted.toString());
+  };
+
+  // NEW: Persist preferred formulas changes
+  const setPreferredFormulas = (formulas) => {
+    setPreferredFormulasState(formulas);
+    sessionStorage.setItem(STORAGE_KEYS.PREFERRED_FORMULAS, JSON.stringify(formulas));
+  };
+
+  // NEW: Persist calculation history changes
+  const setCalculationHistory = (history) => {
+    setCalculationHistoryState(history);
+    sessionStorage.setItem(STORAGE_KEYS.CALCULATION_HISTORY, JSON.stringify(history));
+  };
+
+  // NEW: Helper functions for preferred formulas management
+  const addPreferredFormula = (formulaId) => {
+    const updated = [...preferredFormulas, formulaId];
+    setPreferredFormulas(updated);
+  };
+
+  const removePreferredFormula = (formulaId) => {
+    const updated = preferredFormulas.filter(id => id !== formulaId);
+    setPreferredFormulas(updated);
+  };
+
+  const isFormulaPreferred = (formulaId) => {
+    return preferredFormulas.includes(formulaId);
+  };
+
+  const togglePreferredFormula = (formulaId) => {
+    if (isFormulaPreferred(formulaId)) {
+      removePreferredFormula(formulaId);
+    } else {
+      addPreferredFormula(formulaId);
+    }
+  };
+
+  // NEW: Track formula usage
+  const trackFormulaUsage = (formulaId, inputs, result) => {
+    const usageEntry = {
+      formulaId,
+      timestamp: new Date().toISOString(),
+      inputs: { ...inputs },
+      result: { ...result },
+      unitSystem
+    };
+
+    // Add to history (keep last 100 entries)
+    const updatedHistory = [usageEntry, ...calculationHistory].slice(0, 100);
+    setCalculationHistory(updatedHistory);
+  };
+
+  // NEW: Get recent formulas (last 10 unique formulas)
+  const getRecentFormulas = () => {
+    const recentIds = [];
+    const seen = new Set();
+    
+    for (const entry of calculationHistory) {
+      if (!seen.has(entry.formulaId) && recentIds.length < 10) {
+        recentIds.push(entry.formulaId);
+        seen.add(entry.formulaId);
+      }
+    }
+    
+    return recentIds;
+  };
+
+  // NEW: Get usage frequency for a formula
+  const getFormulaUsageCount = (formulaId) => {
+    return calculationHistory.filter(entry => entry.formulaId === formulaId).length;
+  };
+
+  // NEW: Get most used formulas
+  const getMostUsedFormulas = (limit = 5) => {
+    const frequency = {};
+    
+    calculationHistory.forEach(entry => {
+      frequency[entry.formulaId] = (frequency[entry.formulaId] || 0) + 1;
+    });
+    
+    return Object.entries(frequency)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, limit)
+      .map(([formulaId, count]) => ({ formulaId, count }));
+  };
+
+  // NEW: Get total calculations this week
+  const getThisWeekCalculations = () => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    return calculationHistory.filter(entry => 
+      new Date(entry.timestamp) > oneWeekAgo
+    ).length;
   };
 
   // Get unit label for a given measurement type
@@ -144,11 +252,28 @@ export const UnitProvider = ({ children }) => {
     unitSystem,
     decimalPrecision,
     disclaimerAccepted,
+    preferredFormulas,
+    calculationHistory,  // NEW: Added calculation history state
     
     // Setters
     setUnitSystem,
     setDecimalPrecision,
     setDisclaimerAccepted,
+    setPreferredFormulas,
+    setCalculationHistory,  // NEW: Added calculation history setter
+    
+    // Preferred formulas helper functions
+    addPreferredFormula,
+    removePreferredFormula,
+    isFormulaPreferred,
+    togglePreferredFormula,
+    
+    // NEW: Usage tracking functions
+    trackFormulaUsage,
+    getRecentFormulas,
+    getFormulaUsageCount,
+    getMostUsedFormulas,
+    getThisWeekCalculations,
     
     // Utility functions
     getUnitLabel,
