@@ -1,11 +1,12 @@
 // UPDATED FILE: src/formulas/index.js
-// Main Formula Database Index with Airborne Category
+// Main Formula Database Index with Momentum Category
 import { speedVelocityCategory } from './categories/speedVelocity.js';
 import { timeDistanceCategory } from './categories/timeDistance.js';
 import { factorsCategory } from './categories/factors.js';
 import { edrAnalysisCategory } from './categories/edrAnalysis.js';
 import { pedestrianMotorcycleCategory } from './categories/pedestrianMotorcycle.js';
-import { airborneCategory } from './categories/airborne.js'; // ADD THIS LINE
+import { airborneCategory } from './categories/airborne.js';
+import { momentumCategory } from './categories/momentum.js'; // ADD THIS LINE
 
 // Main formula database export
 export const formulaDatabase = {
@@ -14,7 +15,8 @@ export const formulaDatabase = {
   factors: factorsCategory,
   edrAnalysis: edrAnalysisCategory,
   pedestrianMotorcycle: pedestrianMotorcycleCategory,
-  airborne: airborneCategory // ADD THIS LINE
+  airborne: airborneCategory,
+  momentum: momentumCategory // ADD THIS LINE
 };
 
 // Helper function to get all formulas flattened
@@ -46,66 +48,18 @@ export const getFormulasByCategory = (categoryId) => {
   return category ? Object.values(category.formulas) : [];
 };
 
-// Helper function to get all categories
+// Helper function to get category information
+export const getCategoryInfo = (categoryId) => {
+  return formulaDatabase[categoryId] || null;
+};
+
+// Get all categories for navigation/display
 export const getAllCategories = () => {
-  return Object.values(formulaDatabase).map(category => ({
-    id: category.id,
-    name: category.name,
-    description: category.description,
-    icon: category.icon,
-    formulaCount: Object.keys(category.formulas).length
+  return Object.keys(formulaDatabase).map(key => ({
+    id: key,
+    name: formulaDatabase[key].name,
+    description: formulaDatabase[key].description,
+    color: formulaDatabase[key].color,
+    formulaCount: Object.keys(formulaDatabase[key].formulas).length
   }));
 };
-
-// Helper function to search formulas
-export const searchFormulas = (query) => {
-  if (!query || query.trim() === '') return [];
-  
-  const searchTerm = query.toLowerCase();
-  const allFormulas = getAllFormulas();
-  
-  return allFormulas.filter(formula => 
-    formula.name.toLowerCase().includes(searchTerm) ||
-    formula.description.toLowerCase().includes(searchTerm) ||
-    formula.formula.toLowerCase().includes(searchTerm) ||
-    formula.tags?.some(tag => tag.toLowerCase().includes(searchTerm))
-  );
-};
-
-// Unit helper functions
-export const getUnitLabel = (unitType, unitSystem) => {
-  const unitLabels = {
-    imperial: {
-      distance: 'ft',
-      speed: 'mph',           // Speed is mph (scalar)
-      velocity: 'ft/s',       // Velocity is ft/s (vector)
-      acceleration: 'ft/s²',
-      force: 'lbs',           // Force/Weight in pounds
-      coefficient: '',
-      percentage: '%',
-      time: 's',
-      angle: 'degrees',       // Added for airborne calculations
-      rpm: 'RPM',             // Added for motorcycle/vehicle calculations
-      ratio: '',              // Added for gear ratios
-      wheelRadius: 'inches'   // Added for wheel radius measurements
-    },
-    metric: {
-      distance: 'm',
-      speed: 'km/h',          // Speed is km/h (scalar)
-      velocity: 'm/s',        // Velocity is m/s (vector)
-      acceleration: 'm/s²',
-      force: 'kg',            // Force/Weight in kilograms
-      coefficient: '',
-      percentage: '%',
-      time: 's',
-      angle: 'degrees',       // Added for airborne calculations
-      rpm: 'RPM',             // Added for motorcycle/vehicle calculations
-      ratio: '',              // Added for gear ratios
-      wheelRadius: 'cm'       // Added for wheel radius measurements (metric)
-    }
-  };
-  
-  return unitLabels[unitSystem][unitType] || '';
-};
-
-export default formulaDatabase;

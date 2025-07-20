@@ -2,14 +2,14 @@
 export const pedestrianMotorcycleCategory = {
   id: "pedestrianMotorcycle",
   name: "Pedestrian & Motorcycle",
-  description: "Pedestrian and Motorcylce specialized formulas",
+  description: "Pedestrian and Motorcycle specialized formulas",
   icon: "pedestrian",
   formulas: {
     searleMinimumSpeed: {
       id: "searle_minimum_speed",
       name: "Searle Minimum Speed",
       formula: "Vmin = √(2gfd / (1 + f²))",
-      description: "Calculate minimum speed (fps) to throw a pedestrian or motorcycle rider using Searle equation",
+      description: "Calculate minimum velocity (ft/s) to throw a pedestrian or motorcycle rider using Searle equation",
       category: "pedestrianMotorcycle",
       
       inputs: [
@@ -44,9 +44,10 @@ export const pedestrianMotorcycleCategory = {
         const { g, f, d } = inputs;
         
         // Vmin = √(2gfd / (1 + f²))
+        // This formula calculates velocity directly in ft/s or m/s
         const velocity = Math.sqrt((2 * g * f * d) / (1 + (f * f)));
         
-        // Convert to speed using 1.466 factor for mph
+        // Convert to speed for reference
         let speed;
         if (unitSystem === 'imperial') {
           speed = velocity / 1.466; // ft/s to mph
@@ -55,8 +56,8 @@ export const pedestrianMotorcycleCategory = {
         }
         
         return {
-          velocity: velocity,
-          speed: speed,
+          velocity: velocity,          // Primary result (ft/s or m/s)
+          speed: speed,               // For reference (mph or km/h)
           velocityUnit: unitSystem === 'imperial' ? 'ft/s' : 'm/s',
           speedUnit: unitSystem === 'imperial' ? 'mph' : 'km/h',
           gravity: g,
@@ -80,7 +81,7 @@ export const pedestrianMotorcycleCategory = {
           `Substitution: Vmin = √(2 × ${g} × ${f} × ${d} / (1 + ${f}²))`,
           `Calculation: Vmin = √(${2 * g * f * d} / (1 + ${f * f}))`,
           `Calculation: Vmin = √(${2 * g * f * d} / ${1 + (f * f)})`,
-          `Result: Vmin = ${result.velocity.toFixed(2)} ${result.velocityUnit} (${result.speed.toFixed(2)} ${result.speedUnit})`
+          `Result: Vmin = ${result.velocity.toFixed(2)} ${result.velocityUnit}`
         ];
       },
 
@@ -93,7 +94,7 @@ export const pedestrianMotorcycleCategory = {
       id: "searle_maximum_speed",
       name: "Searle Maximum Speed",
       formula: "Vmax = √(2gfd)",
-      description: "Calculate maximum speed (fps) to throw a pedestrian or motorcycle rider using Searle equation",
+      description: "Calculate maximum velocity (ft/s) to throw a pedestrian or motorcycle rider using Searle equation",
       category: "pedestrianMotorcycle",
       
       inputs: [
@@ -128,9 +129,10 @@ export const pedestrianMotorcycleCategory = {
         const { g, f, d } = inputs;
         
         // Vmax = √(2gfd)
+        // This formula calculates velocity directly in ft/s or m/s
         const velocity = Math.sqrt(2 * g * f * d);
         
-        // Convert to speed using 1.466 factor for mph
+        // Convert to speed for reference
         let speed;
         if (unitSystem === 'imperial') {
           speed = velocity / 1.466; // ft/s to mph
@@ -139,8 +141,8 @@ export const pedestrianMotorcycleCategory = {
         }
         
         return {
-          velocity: velocity,
-          speed: speed,
+          velocity: velocity,          // Primary result (ft/s or m/s)
+          speed: speed,               // For reference (mph or km/h)
           velocityUnit: unitSystem === 'imperial' ? 'ft/s' : 'm/s',
           speedUnit: unitSystem === 'imperial' ? 'mph' : 'km/h',
           gravity: g,
@@ -163,7 +165,7 @@ export const pedestrianMotorcycleCategory = {
           "Formula: Vmax = √(2gfd)",
           `Substitution: Vmax = √(2 × ${g} × ${f} × ${d})`,
           `Calculation: Vmax = √(${2 * g * f * d})`,
-          `Result: Vmax = ${result.velocity.toFixed(2)} ${result.velocityUnit} (${result.speed.toFixed(2)} ${result.speedUnit})`
+          `Result: Vmax = ${result.velocity.toFixed(2)} ${result.velocityUnit}`
         ];
       },
 
@@ -539,6 +541,7 @@ export const pedestrianMotorcycleCategory = {
         const { rpm, Rw, finalGearRatio } = inputs;
         
         // S = (Engine RPM × Rw) / (Final Gear Ratio × 1681)
+        // This formula directly calculates speed in MPH
         const speed = (rpm * Rw) / (finalGearRatio * 1681);
         
         // Convert to metric if needed
@@ -552,41 +555,34 @@ export const pedestrianMotorcycleCategory = {
         
         return {
           speed: convertedSpeed,
-          speedMph: speed, // Always keep mph for reference
+          speedUnit: speedUnit,
           rpm: rpm,
           wheelRadius: Rw,
-          gearRatio: finalGearRatio,
-          speedUnit: speedUnit,
-          wheelRadiusUnit: 'inches'
+          finalGearRatio: finalGearRatio,
+          wheelRadiusUnit: unitSystem === 'imperial' ? 'inches' : 'cm'
         };
       },
 
       generateSteps: (inputs, unitSystem, result) => {
         const { rpm, Rw, finalGearRatio } = inputs;
+        const wheelRadiusUnit = unitSystem === 'imperial' ? 'inches' : 'cm';
         
         return [
           "Given:",
           `Engine RPM = ${rpm}`,
-          `Radius of Drive Wheel (Rw) = ${Rw} inches`,
+          `Wheel Radius (Rw) = ${Rw} ${wheelRadiusUnit}`,
           `Final Gear Ratio = ${finalGearRatio}`,
           "",
           "Formula: S = (Engine RPM × Rw) / (Final Gear Ratio × 1681)",
           `Substitution: S = (${rpm} × ${Rw}) / (${finalGearRatio} × 1681)`,
           `Calculation: S = ${rpm * Rw} / ${finalGearRatio * 1681}`,
-          `Result: S = ${result.speedMph.toFixed(2)} mph${unitSystem === 'metric' ? ` (${result.speed.toFixed(2)} km/h)` : ''}`
+          `Result: S = ${result.speed.toFixed(2)} ${result.speedUnit}`
         ];
       },
 
       resultUnit: "speed",
-      tags: ["motorcycle", "speed", "rpm", "gear", "wheel"],
-      relatedFormulas: ["motorcycle_lateral_friction_speed", "motorcycle_radius_speed"],
-      
-      notes: [
-        "Do not use for vehicles equipped with CVT",
-        "Do not use at wide open throttle",
-        "Do not use when passenger car is in first gear",
-        "Final gear ratio = transmission gear ratio × differential ratio"
-      ]
+      tags: ["motorcycle", "rpm", "speed", "gear", "ratio"],
+      relatedFormulas: []
     }
   }
 };

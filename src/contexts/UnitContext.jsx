@@ -16,7 +16,8 @@ const STORAGE_KEYS = {
 const UNIT_LABELS = {
   imperial: {
     distance: 'ft',
-    speed: 'ft/s',
+    speed: 'mph',        // ← Change from 'ft/s' to 'mph'
+    velocity: 'ft/s',    // ← Add velocity as separate unit type
     acceleration: 'ft/s²',
     mass: 'lbs',
     force: 'lbf',
@@ -25,7 +26,8 @@ const UNIT_LABELS = {
   },
   metric: {
     distance: 'm',
-    speed: 'm/s',
+    speed: 'km/h',       // ← Already correct
+    velocity: 'm/s',     // ← Add velocity as separate unit type
     acceleration: 'm/s²',
     mass: 'kg',
     force: 'N',

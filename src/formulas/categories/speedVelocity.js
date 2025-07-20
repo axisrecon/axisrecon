@@ -42,21 +42,22 @@ export const speedVelocityCategory = {
       calculate: (inputs, unitSystem) => {
         const { d, f, n } = inputs;
         // S = √(30 × d × f × (n/100))
+        // This formula directly calculates speed in MPH (not velocity in ft/s)
         const speed = Math.sqrt(30 * d * f * (n / 100));
         
-        // Convert to speed using 1.466 factor
-        let speedMph;
+        // Convert to velocity using 1.466 factor for calculations that need ft/s
+        let velocity;
         if (unitSystem === 'imperial') {
-          speedMph = speed / 1.466; // ft/s to mph
+          velocity = speed * 1.466; // mph to ft/s
         } else {
-          speedMph = speed * 3.6; // m/s to km/h
+          velocity = speed / 3.6; // km/h to m/s
         }
         
         return {
-          velocity: speed,        // ft/s or m/s (vector)
-          speed: speedMph,        // mph or km/h (scalar)
-          velocityUnit: unitSystem === 'imperial' ? 'ft/s' : 'm/s',
-          speedUnit: unitSystem === 'imperial' ? 'mph' : 'km/h'
+          speed: speed,           // mph or km/h (primary result)
+          velocity: velocity,     // ft/s or m/s (for reference)
+          speedUnit: unitSystem === 'imperial' ? 'mph' : 'km/h',
+          velocityUnit: unitSystem === 'imperial' ? 'ft/s' : 'm/s'
         };
       },
 
@@ -73,7 +74,7 @@ export const speedVelocityCategory = {
           "Formula: S = √(30 × d × f × n)",
           `Substitution: S = √(30 × ${d} × ${f} × ${n/100})`,
           `Calculation: S = √(${30 * d * f * (n/100)})`,
-          `Result: S = ${result.velocity.toFixed(2)} ${result.velocityUnit} (${result.speed.toFixed(2)} ${result.speedUnit})`
+          `Result: S = ${result.speed.toFixed(2)} ${result.speedUnit}`
         ];
       },
 
@@ -122,29 +123,30 @@ export const speedVelocityCategory = {
         const { speeds } = inputs;
         
         // Sc = √(S₁² + S₂² + S₃² + ...)
+        // Input speeds are in MPH, calculation gives result in MPH
         const sumOfSquares = speeds.reduce((sum, speed) => sum + (speed * speed), 0);
         const combinedSpeed = Math.sqrt(sumOfSquares);
         
-        // Convert to speed using 1.466 factor
-        let speedMph;
+        // Convert to velocity for reference
+        let velocity;
         if (unitSystem === 'imperial') {
-          speedMph = combinedSpeed / 1.466; // ft/s to mph
+          velocity = combinedSpeed * 1.466; // mph to ft/s
         } else {
-          speedMph = combinedSpeed * 3.6; // m/s to km/h
+          velocity = combinedSpeed / 3.6; // km/h to m/s
         }
         
         return {
-          velocity: combinedSpeed,    // ft/s or m/s (vector)
-          speed: speedMph,            // mph or km/h (scalar)
-          velocityUnit: unitSystem === 'imperial' ? 'ft/s' : 'm/s',
+          speed: combinedSpeed,       // mph or km/h (primary result)
+          velocity: velocity,         // ft/s or m/s (for reference)
           speedUnit: unitSystem === 'imperial' ? 'mph' : 'km/h',
+          velocityUnit: unitSystem === 'imperial' ? 'ft/s' : 'm/s',
           individualSpeeds: speeds
         };
       },
 
       generateSteps: (inputs, unitSystem, result) => {
         const { speeds } = inputs;
-        const speedUnit = unitSystem === 'imperial' ? 'ft/s' : 'm/s';
+        const speedUnit = unitSystem === 'imperial' ? 'mph' : 'km/h';
         
         const steps = [
           "Given:",
@@ -154,7 +156,7 @@ export const speedVelocityCategory = {
           `Substitution: Sc = √(${speeds.map((s, i) => `${s}²`).join(' + ')})`,
           `Calculation: Sc = √(${speeds.map(s => s * s).join(' + ')})`,
           `Calculation: Sc = √(${speeds.reduce((sum, s) => sum + (s * s), 0)})`,
-          `Result: Sc = ${result.velocity.toFixed(2)} ${result.velocityUnit} (${result.speed.toFixed(2)} ${result.speedUnit})`
+          `Result: Sc = ${result.speed.toFixed(2)} ${result.speedUnit}`
         ];
         
         return steps;
@@ -258,9 +260,10 @@ export const speedVelocityCategory = {
         const { r, f } = inputs;
         
         // S = 3.86√(rf)
+        // This formula directly calculates speed in MPH
         const speed = 3.86 * Math.sqrt(r * f);
         
-        // Convert to velocity using 1.466 factor
+        // Convert to velocity for reference
         let velocity;
         if (unitSystem === 'imperial') {
           velocity = speed * 1.466; // mph to ft/s
@@ -269,8 +272,8 @@ export const speedVelocityCategory = {
         }
         
         return {
-          speed: speed,               // mph or km/h (scalar)
-          velocity: velocity,         // ft/s or m/s (vector)
+          speed: speed,               // mph or km/h (primary result)
+          velocity: velocity,         // ft/s or m/s (for reference)
           speedUnit: unitSystem === 'imperial' ? 'mph' : 'km/h',
           velocityUnit: unitSystem === 'imperial' ? 'ft/s' : 'm/s',
           radius: r,
@@ -291,7 +294,7 @@ export const speedVelocityCategory = {
           `Substitution: S = 3.86 × √(${r} × ${f})`,
           `Calculation: S = 3.86 × √(${r * f})`,
           `Calculation: S = 3.86 × ${Math.sqrt(r * f).toFixed(3)}`,
-          `Result: S = ${result.speed.toFixed(2)} ${result.speedUnit} (${result.velocity.toFixed(2)} ${result.velocityUnit})`
+          `Result: S = ${result.speed.toFixed(2)} ${result.speedUnit}`
         ];
       },
 
